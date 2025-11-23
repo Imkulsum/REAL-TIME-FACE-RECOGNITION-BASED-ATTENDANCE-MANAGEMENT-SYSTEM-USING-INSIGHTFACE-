@@ -1,0 +1,72 @@
+<!-- templates/camera.html → SMALL CLEAN TEXT ALWAYS VISIBLE -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-center mb-4 text-primary fw-bold">
+        Taking Attendance – {{ subject_code }}
+    </h2>
+
+    <div class="text-center position-relative d-inline-block">
+        <video id="video" width="720" height="540" autoplay muted class="rounded shadow"></video>
+
+        <!-- Small permanent status bar at bottom -->
+        <div id="statusBar" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-4 py-2 rounded-pill text-white fw-bold"
+             style="background:rgba(0,0,0,0.7); font-size:1.1rem; min-width:300px; display:none;">
+            Detecting...
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button id="doneBtn" class="btn btn-danger btn-lg px-5">Done Taking Attendance</button>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const statusBar = document.getElementById('statusBar');
+    const doneBtn = document.getElementById('doneBtn');
+
+    // Start camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => { alert("Camera access denied! Allow camera in browser."); });
+
+    // Recognition loop
+    setInterval(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const data = canvas.toDataURL('image/jpeg');
+
+        fetch('/recognize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: data, subject: "{{ subject_code }}" })
+        })
+        .then(res => res.json())
+        .then(result => {
+            statusBar.style.display = "block";
+
+            if (result.status === "known") {
+                statusBar.textContent = result.name + " – Present Marked";
+                statusBar.style.background = "rgba(0, 180, 0, 0.9)";
+                new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=").play(); // beep
+            }
+            else if (result.status === "already") {
+                statusBar.textContent = result.name + " – Already Marked Today";
+                statusBar.style.background = "rgba(255, 150, 0, 0.9)";
+            }
+            else if (result.status === "unknown") {
+                statusBar.textContent = "Unknown Person";
+                statusBar.style.background = "rgba(200, 0, 0, 0.9)";
+            }
+        })
+        .catch(() => {
+            statusBar.style.display = "none";
+        });
+    }, 2000); // every 2 seconds
+
+    doneBtn.onclick = () => { window.location.href = "/teacher"; };
+</script>
+{% endblock %}

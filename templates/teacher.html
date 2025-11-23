@@ -1,0 +1,42 @@
+<!-- templates/teacher.html → FINAL VERSION WITH TIMETABLE BUTTON -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-5 fw-bold text-primary text-center mb-5">
+        Welcome, {{ session.name }} (Teacher)
+    </h1>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Start Attendance -->
+        <div class="col-md-5">
+            <a href="/camera" class="btn btn-success btn-lg w-100 py-5 shadow-lg text-white">
+                <i class="fas fa-camera fa-3x mb-3"></i><br>
+                <strong>Start Taking Attendance</strong>
+            </a>
+        </div>
+
+        <!-- View Attendance Sheet -->
+        <div class="col-md-5">
+            <a href="/view_attendance" class="btn btn-primary btn-lg w-100 py-5 shadow-lg text-white">
+                <i class="fas fa-table fa-3x mb-3"></i><br>
+                <strong>View Attendance Sheet</strong>
+            </a>
+        </div>
+
+        <!-- View Timetable -->
+        <div class="col-md-10 mt-4">
+            <a href="/timetable" class="btn btn-info btn-lg w-100 py-4 shadow-lg text-white">
+                <i class="fas fa-calendar-alt fa-2x mb-3"></i><br>
+                <strong>View 7th Semester Timetable</strong>
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <p class="text-muted">
+            Subject: <strong>{{ session.user_id }}</strong> • 
+            Total Students Registered: <strong>5</strong>
+        </p>
+    </div>
+</div>
+{% endblock %}

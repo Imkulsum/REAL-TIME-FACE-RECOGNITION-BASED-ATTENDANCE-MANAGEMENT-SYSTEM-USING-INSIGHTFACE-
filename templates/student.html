@@ -1,0 +1,95 @@
+<!-- templates/student.html → FINAL VERSION WITH TIMETABLE BUTTON -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-5 fw-bold text-primary mb-4 text-center">
+        Welcome, {{ session.name }}!
+    </h1>
+
+    <!-- View Timetable Button -->
+    <div class="text-center mb-5">
+        <a href="/timetable" class="btn btn-info btn-lg px-5 shadow-lg">
+            <i class="fas fa-calendar-week me-2"></i>View 7th Semester Timetable
+        </a>
+    </div>
+
+    <!-- Attendance Summary -->
+    <div class="card shadow-lg border-0 mb-5">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Your Attendance Summary</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Subject</th>
+                            <th>Teacher</th>
+                            <th>Total</th>
+                            <th>Present</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in subjects %}
+                        <tr {% if sub.percentage < 75 %}class="table-danger"{% endif %}>
+                            <td><strong>{{ sub.code }}</strong></td>
+                            <td>{{ sub.name }}</td>
+                            <td>{{ sub.teacher }}</td>
+                            <td class="text-center">{{ sub.total }}</td>
+                            <td class="text-center text-success fw-bold">{{ sub.present }}</td>
+                            <td class="text-center">
+                                <span class="badge fs-5 {% if sub.percentage >= 75 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ "%.1f"|format(sub.percentage) }}%
+                                </span>
+                            </td>
+                            <td>
+                                {% if sub.percentage >= 75 %}
+                                    <span class="text-success fw-bold">Eligible</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold">Shortage!</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light text-center">
+            <small class="text-muted">Minimum 75% attendance required for exam eligibility</small>
+        </div>
+    </div>
+
+    <!-- Detailed Records -->
+    <h3 class="mb-3 text-center">Detailed Attendance Record</h3>
+    {% if attendance|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in attendance %}
+                <tr>
+                    <td>{{ rec.date }}</td>
+                    <td>{{ rec.subject_name }}</td>
+                    <td><span class="badge bg-success">Present</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center p-4">
+        No attendance recorded yet. Attend classes to see records here!
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+<!-- templates/view_attendance.html → FINAL 100% WORKING (NO ERRORS) -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-5 fw-bold text-primary text-center mb-4">
+        Attendance Sheet — {{ subject_name }}
+    </h1>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">
+                Date: {{ today_date }}
+            </h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="attendance-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Status (Today)</th>
+                            <th>Overall %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr data-id="{{ student.id }}">
+                            <td><strong>{{ student.id }}</strong></td>
+                            <td>{{ student.name }}</td>
+                            <td id="status-{{ student.id }}">
+                                {% if student.present_today %}
+                                    <span class="badge bg-success fs-6">Present</span>
+                                {% else %}
+                                    <span class="badge bg-danger fs-6">Absent</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {% if student.percentage >= 75 %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                                    {{ "%.1f"|format(student.percentage) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light text-center">
+            <h5>
+                Total Lectures: {{ total_lectures }} | 
+                Present Today: <span id="present-count">{{ present_today_count }}</span>/5
+            </h5>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/teacher" class="btn btn-secondary btn-lg px-5">Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+// LIVE UPDATE EVERY 3 SECONDS
+setInterval(() => {
+    fetch('/get_live_attendance')
+        .then(res => res.json())
+        .then(data => {
+            let present = 0;
+            data.students.forEach(s => {
+                const cell = document.getElementById('status-' + s.id);
+                if (s.present_today) {
+                    cell.innerHTML = '<span class="badge bg-success fs-6">Present</span>';
+                    present++;
+                } else {
+                    cell.innerHTML = '<span class="badge bg-danger fs-6">Absent</span>';
+                }
+            });
+            document.getElementById('present-count').textContent = present;
+        });
+}, 3000);
+</script>
+{% endblock %}
